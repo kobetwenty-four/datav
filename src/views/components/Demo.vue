@@ -9,12 +9,14 @@ import * as echarts from 'echarts'
 
 // * 加载标识
 const loading = ref<boolean>(true)
+let currentIndex = ref()
+
 onMounted(() => {
   cancelLoading()
   setTimeout(() => {
     var chartDom = document.getElementById('main')!
     var myChart = echarts.init(chartDom)
-    var option
+    var option: any
 
     option = {
       legend: {
@@ -22,7 +24,7 @@ onMounted(() => {
       },
       tooltip: {
         trigger: 'item',
-        position: function (point, params, dom, rect, size) {
+        position: function (point: any) {
           return point
         }
       },
@@ -61,7 +63,7 @@ onMounted(() => {
 
     option && myChart.setOption(option)
 
-    myChart.currentIndex = -1
+    currentIndex.value = -1
     //myChart.setOption(option);
     //console.log(option.series[0].data[0]);
     setInterval(function () {
@@ -70,21 +72,21 @@ onMounted(() => {
       myChart.dispatchAction({
         type: 'downplay',
         seriesIndex: 0,
-        dataIndex: myChart.currentIndex
+        dataIndex: currentIndex.value
       })
-      myChart.currentIndex = (myChart.currentIndex + 1) % dataLen
+      currentIndex.value = (currentIndex.value + 1) % dataLen
       // 高亮当前图形
       myChart.dispatchAction({
         type: 'highlight',
         seriesIndex: 0,
-        dataIndex: myChart.currentIndex
+        dataIndex: currentIndex.value
       })
       myChart.dispatchAction({
         type: 'showTip',
         // 系列的 index，在 tooltip 的 trigger 为 axis 的时候可选。
         seriesIndex: 0,
         // 数据项的 index，如果不指定也可以通过 name 属性根据名称指定数据项
-        dataIndex: myChart.currentIndex
+        dataIndex: currentIndex.value
       })
     }, 1000)
   }, 600)

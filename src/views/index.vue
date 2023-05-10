@@ -132,12 +132,18 @@ import Rule from './components/Rule1.vue'
 import Server from './components/Server.vue'
 import Demo from './components/Demo.vue'
 import Line from './components/Line.vue'
-
+interface IState {
+  setInterval: ReturnType<typeof setInterval> | null
+  dateDay: string
+  dateYear: string
+  dateWeek: string
+  decorationColors: string
+}
 // * 加载标识
 const loading = ref<boolean>(true)
 // * 时间内容
-const timeInfo = reactive({
-  setInterval: 0,
+const timeInfo = reactive<IState>({
+  setInterval: null,
   dateDay: '',
   dateYear: '',
   dateWeek: '',
@@ -164,7 +170,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   unWindowDraw()
-  clearInterval(timeInfo.setInterval)
+  clearInterval(timeInfo.setInterval!)
 })
 
 // methods

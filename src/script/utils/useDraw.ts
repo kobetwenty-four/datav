@@ -4,7 +4,7 @@ export default function useDraw() {
   // 指向最外层容器
   const appRef = ref()
   // 定时函数
-  const timer = ref(0)
+  const timer = ref<ReturnType<typeof setInterval> | null>()
   // 默认缩放值
   const scale = {
     width: '1',
@@ -49,7 +49,7 @@ export default function useDraw() {
   }
 
   const resize = () => {
-    clearTimeout(timer.value)
+    clearTimeout(timer.value!)
     timer.value = setTimeout(() => {
       calcRate()
     }, 200)
