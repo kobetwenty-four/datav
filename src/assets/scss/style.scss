@@ -1,4 +1,4 @@
-@import "./variables";
+@import './variables';
 
 //  全局样式
 * {
@@ -8,7 +8,20 @@
   box-sizing: border-box;
   outline: none;
 }
+/* 更改滚动条样式 */
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+}
 
+::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  border-radius: 5px;
+  background: rgb(124, 231, 253);
+  transition: color 0.2s ease;
+}
 html {
   margin: 0;
   padding: 0;
@@ -31,7 +44,7 @@ a {
 
 .clearfix {
   &::after {
-    content: "";
+    content: '';
     display: table;
     height: 0;
     line-height: 0;
@@ -42,7 +55,7 @@ a {
 
 // 图标
 .iconfont {
-  font-size: 20px!important;
+  font-size: 20px !important;
   color: #5cd9e8;
 }
 

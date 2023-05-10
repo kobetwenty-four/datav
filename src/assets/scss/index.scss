@@ -37,19 +37,19 @@
       background-repeat: no-repeat;
 
       .title-text {
-        font-size: 24px;
+        font-size: 30px;
         position: absolute;
-        bottom: 0;
+        bottom: -10px;
         left: 50%;
         transform: translate(-50%);
       }
 
       .dv-dec-6 {
         position: absolute;
-        bottom: -30px;
+        bottom: -40px;
         left: 50%;
         width: 250px;
-        height: 8px;
+        height: 15px;
         transform: translate(-50%);
       }
     }
@@ -128,14 +128,15 @@
       //下方区域的布局
       .content-box {
         display: grid;
-        grid-template-columns: 2fr 3fr 5fr 3fr 2fr;
+        // grid-template-columns: 2fr 3fr 5fr 3fr 2fr;
+        grid-template-columns: 1fr 1fr 1fr;
       }
 
       // 底部数据
       .bototm-box {
         margin-top: 10px;
         display: grid;
-        grid-template-columns: repeat(2, 50%);
+        // grid-template-columns: repeat(2, 50%);
       }
     }
   }

@@ -1,12 +1,14 @@
 <template>
   <div class="app">
-    <router-view />
+    <dv-full-screen-container>
+      <router-view />
+    </dv-full-screen-container>
   </div>
 </template>
 <script setup lang="ts">
-import * as echarts from "echarts";
-import { provide } from "vue";
-provide("echarts", echarts);
+import * as echarts from 'echarts'
+import { provide } from 'vue'
+provide('echarts', echarts)
 </script>
 
 <style lang="less" scoped>

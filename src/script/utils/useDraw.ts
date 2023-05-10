@@ -8,26 +8,40 @@ export default function useDraw() {
   // 默认缩放值
   const scale = {
     width: '1',
-    height: '1',
+    height: '1'
   }
   // 设计稿尺寸（px）
   const baseWidth = 1920
   const baseHeight = 1080
+  // let baseWidth = document.documentElement.clientWidth
+  // let baseHeight = document.documentElement.clientHeight
 
   // 需保持的比例
   const baseProportion = parseFloat((baseWidth / baseHeight).toFixed(5))
+  console.log(baseProportion)
+
   const calcRate = () => {
     // 当前宽高比
-    const currentRate = parseFloat((window.innerWidth / window.innerHeight).toFixed(5))
+    const currentRate = parseFloat(
+      (window.innerWidth / window.innerHeight).toFixed(5)
+    )
     if (appRef.value) {
+      // appRef.value.style.transformOrigin = 'left top'
       if (currentRate > baseProportion) {
         // 表示更宽
-        scale.width = ((window.innerHeight * baseProportion) / baseWidth).toFixed(5)
+        scale.width = (
+          (window.innerHeight * baseProportion) /
+          baseWidth
+        ).toFixed(5)
         scale.height = (window.innerHeight / baseHeight).toFixed(5)
         appRef.value.style.transform = `scale(${scale.width}, ${scale.height}) translate(-50%, -50%)`
       } else {
         // 表示更高
-        scale.height = ((window.innerWidth / baseProportion) / baseHeight).toFixed(5)
+        scale.height = (
+          window.innerWidth /
+          baseProportion /
+          baseHeight
+        ).toFixed(5)
         scale.width = (window.innerWidth / baseWidth).toFixed(5)
         appRef.value.style.transform = `scale(${scale.width}, ${scale.height}) translate(-50%, -50%)`
       }
@@ -58,4 +72,3 @@ export default function useDraw() {
     unWindowDraw
   }
 }
-
