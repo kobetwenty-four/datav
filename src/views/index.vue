@@ -93,7 +93,7 @@
               <span class="ruleTitle">规则监管</span>
               <!-- </div> -->
               <div class="ruleChart">
-                <Demo class="one" />
+                <RuleLeft class="one" />
                 <Line class="two" />
                 <Rule />
               </div>
@@ -130,8 +130,8 @@ import Task from './components/Task.vue'
 import Person from './components/Person.vue'
 import Rule from './components/Rule1.vue'
 import Server from './components/Server.vue'
-import Demo from './components/Demo.vue'
-import Line from './components/Line.vue'
+import RuleLeft from './components/RuleLeft1.vue'
+import Line from './components/Line1.vue'
 interface IState {
   setInterval: ReturnType<typeof setInterval> | null
   dateDay: string

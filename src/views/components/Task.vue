@@ -5,112 +5,142 @@
     <span class="title">任务监管</span>
     <div class="task-top">
       <dv-active-ring-chart
+        v-if="total"
         :config="conf"
-        :style="{ width: '300px', height: '300px' }"
+        style="width: 300px; height: 300px"
       ></dv-active-ring-chart>
-      <!-- :style="{ width: '33.33%', height: height }" -->
-      <!-- :style="{ width: '300px', height: height }" -->
-      <!-- <div flex="~ col" gap2 justify-center items-center> -->
-      <div class="task-word" justify-center items-center>
+      <div v-else style="width: 300px; height: 300px"></div>
+      <div class="task-word">
         <div class="tw-one">
-          <div>
-            <span>运行中: </span>
-            <span style="color: #50e3c2">15个</span>
-          </div>
-          <div>
-            <span>等待中：</span>
-            <span style="color: #f58220">37个</span>
+          <div v-for="item in rightTopData" :key="item.status">
+            <span>{{ item.name }}: </span>
+            <span :style="{ color: item.color }">{{ item.value }} 个</span>
           </div>
         </div>
         <div class="tw-two">
-          <div>
-            <span>成功：</span>
-            <span style="color: #00ff00">81个</span>
-          </div>
-          <div>
-            <span>失败： </span>
-            <span style="color: #ef4136">3个</span>
+          <div v-for="item in rightMiddleData" :key="item.status">
+            <span>{{ item.name }}: </span>
+            <span :style="{ color: item.color }">{{ item.value }} 个</span>
           </div>
         </div>
         <div class="task-bottom">
           <div>
-            <span>整体分析耗时：</span>
-            <span style="color: #00ff00">17 h 02 min</span>
+            <span>{{ rightBottomData.name }}：</span>
+            <span style="color: #00ff00">{{
+              time(rightBottomData.value)
+            }}</span>
           </div>
         </div>
-        <!-- <div>
-        <span text-white>城市：</span>
-        <input v-model="cityName" demo-input />
-      </div>
-      <div>
-        <span text-white>Value：</span>
-        <input v-model="cityValue" type="number" demo-input />
-      </div>
-      <div>
-        <button btn @click="addData">添加数据</button>
-      </div> -->
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, reactive, toRefs, onMounted } from 'vue'
+import { ref, reactive, toRefs, onMounted, nextTick } from 'vue'
+import { getTaskLists } from '@/script/api/task'
+import { time } from '@/script/utils/format'
+
+interface IState {
+  name: string
+  value: number
+  status: string
+  color?: string
+}
+interface IStateRightData {
+  rightTopData: IState[]
+  rightMiddleData: IState[]
+  rightBottomData: IState
+}
+
+interface IColor {
+  lineWidth: number
+  digitalFlopStyle: {
+    fill: string
+  }
+  color: string[]
+  showOriginValue: boolean
+  data: any[]
+  activeTimeGap: number
+}
 // * 加载标识
 const loading = ref<boolean>(true)
+// * 总数
+const total = ref()
 
-// todo 处理 loading 展示
-const cancelLoading = () => {
-  setTimeout(() => {
-    loading.value = false
-  }, 500)
-}
-// const props = defineProps({
-//   height: {
-//     type: String,
-//     // default: '240px'
-//     // default: '15rem'
-//     default: '450px'
-//   }
-// })
-const conf = reactive({
+const conf = reactive<IColor>({
   lineWidth: 24,
   digitalFlopStyle: {
     fill: 'pink'
   },
-  color: ['#50e3c2', '#f58220', '#00ff00', '#ef4136'],
+  color: [],
   showOriginValue: false,
-  data: [
-    {
-      name: '运行中',
-      value: 98
-    },
-    {
-      name: '等待中',
-      value: 150
-    },
-    {
-      name: '成功',
-      value: 62
-    },
-    {
-      name: '失败',
-      value: 54
-    }
-  ]
+  data: [],
+  activeTimeGap: 2000
 })
-onMounted(() => {
-  cancelLoading()
+const rightData = reactive<IStateRightData>({
+  rightTopData: [],
+  rightMiddleData: [],
+  rightBottomData: { name: '', value: 0, status: '', color: '' }
 })
-// const addData = () => {
-//   if (!cityName.value || !cityValue.value) return
 
-//   conf.data.push({
-//     name: cityName.value,
-//     value: parseInt(cityValue.value.toString())
-//   })
-// }
+const initTaskLists = async () => {
+  try {
+    let colorLists = [
+      '#00ae9d',
+      '#00ff00',
+      '#ef4136',
+      '#50e3c2',
+      '#f58220',
+      '#ffd400',
+      '#00ff00'
+    ]
+    // 1总数，2成功，3失败，4运行，5等待，6验证，7时间
+    const leftChartStatus = ['2', '3', '4', '5', '6']
+    const rightTopStatus = ['4', '5', '6']
+    const rightMiddleStatus = ['2', '3', '1']
+    const res: any = await getTaskLists()
+    //给接口数据添加color字段
+    const addColorData = res.map((item: IState) => {
+      return {
+        ...item,
+        color: colorLists[+item.status - 1]
+      }
+    })
+    // 任务总数
+    const taskTotal = res.find((item: IState) => item.status === '1')
+    total.value = taskTotal.value
+    // 左边图表数据
+    const filterLeftChartData = addColorData.filter((item: IState) =>
+      leftChartStatus.includes(item.status)
+    )
+    // 右上数据
+    const filterRightTopData = addColorData.filter((item: IState) =>
+      rightTopStatus.includes(item.status)
+    )
+    // 右中数据
+    const filterRightMiddleData = addColorData.filter((item: IState) =>
+      rightMiddleStatus.includes(item.status)
+    )
+    // 右下数据
+    const filterRightBottomData = addColorData.find(
+      (item: IState) => item.status === '7'
+    )
+    // 赋值
+    rightData.rightTopData = filterRightTopData
+    rightData.rightMiddleData = filterRightMiddleData
+    rightData.rightBottomData = filterRightBottomData
+    conf.data = filterLeftChartData
+    conf.color = filterLeftChartData.map((item: IState) => {
+      return item.color
+    })
+    loading.value = false
+  } catch (error) {
+    loading.value = false
+  }
+}
+initTaskLists()
 
-const { data } = toRefs(conf)
+const { rightTopData, rightMiddleData, rightBottomData } = toRefs(rightData)
 </script>
 <style lang="scss" scoped>
 .task {
@@ -134,18 +164,20 @@ const { data } = toRefs(conf)
       justify-content: space-between;
       flex-direction: column;
       // padding: 4rem 3rem 2rem 0;
-      padding: 50px 20px 70px 0;
+      padding: 50px 10px 70px 0;
       .tw-one {
         display: flex;
-        div:nth-child(2) {
+        div:nth-child(2),
+        div:nth-child(3) {
           // padding-left: 2rem;
-          padding-left: 20px;
+          padding-left: 10px;
         }
       }
 
       .tw-two {
         display: flex;
-        div:nth-child(2) {
+        div:nth-child(2),
+        div:nth-child(3) {
           // padding-left: 3rem;
           padding-left: 20px;
         }

@@ -3,6 +3,18 @@
   <div v-else class="server">
     <div class="title">
       <span>服务器监管</span>
+      <div class="chartIcon">
+        <span class="border"></span>
+        <span style="color: #ef4136">注销</span>
+      </div>
+      <div class="chartIcon">
+        <span class="border1"></span>
+        <span style="color: #77787b">超时</span>
+      </div>
+      <div class="chartIcon">
+        <span class="border2"></span>
+        <span style="color: #00ff00">正常</span>
+      </div>
     </div>
     <div
       style="
@@ -18,12 +30,14 @@
     >
       <div class="server-chart" v-for="item in serverData" :key="item.value">
         <dv-decoration-9
-          style="width: 110px; height: 110px"
+          style="width: 120px; height: 120px"
           :color="item.color"
+          :dur="item?.dur"
         >
           <div :style="{ color: item.fontColor }">{{ item.percent }}</div>
         </dv-decoration-9>
         <div style="margin: 20px 0" :style="{ color: item.fontColor }">
+          <!-- {{ item.value + '（' + item.status + '）' }} -->
           {{ item.value }}
         </div>
       </div>
@@ -31,77 +45,77 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { reactive, toRefs, watch, ref, onMounted } from 'vue'
-import useDraw from '@/script/utils/useDraw'
+import { reactive, toRefs, ref } from 'vue'
+import { getServerLists } from '@/script/api/serve'
+
+interface IState {
+  serverData: {
+    percent: string
+    value: string
+    color: string[]
+    fontColor: string
+    status: string
+    dur?: number
+  }[]
+}
+interface IApi {
+  percent: string
+  value: string
+  status: string
+  statusCode: string
+}
+type Fn = { color: string[]; fontColor: string; dur?: number }
 
 // * 加载标识
 const loading = ref<boolean>(true)
-// 适配处理
-const { appRef, calcRate, windowDraw, unWindowDraw } = useDraw()
 
-const data = reactive({
-  serverData: [
-    {
-      percent: '66%',
-      value: '192.168.7.120',
-      color: ['#50e3c2', '#f58220'],
-      fontColor: '#ff00ff'
-    },
-    {
-      percent: '16%',
-      value: '192.168.7.121',
-      color: ['#1d953f', '#ef4136'],
-      fontColor: '#1d953f'
-    },
-    {
-      percent: '66%',
-      value: '192.168.7.120',
-      color: ['#ff00ff', '#00ff00'],
-      fontColor: '#00ff00'
-    },
-    {
-      percent: '66%',
-      value: '192.168.7.120',
-      color: ['#4fd2dd', '#235fa7'],
-      fontColor: '#ef4136'
-    },
-    {
-      percent: '16%',
-      value: '192.168.7.121',
-      color: ['#1d953f', '#ef4136'],
-      fontColor: '#ffff00'
-    },
-    {
-      percent: '66%',
-      value: '192.168.7.120',
-      color: ['#ff00ff', '#00ff00'],
-      fontColor: '#fff'
-    },
-    {
-      percent: '16%',
-      value: '192.168.7.121',
-      color: ['#1d953f', '#ef4136'],
-      fontColor: '#ffff00'
-    },
-    {
-      percent: '66%',
-      value: '192.168.7.120',
-      color: ['#ff00ff', '#00ff00'],
-      fontColor: '#fff'
-    }
-  ]
+const data = reactive<IState>({
+  serverData: []
 })
 
-const emits = defineEmits(['getLength'])
-emits('getLength', data.serverData.length)
-const cancelLoading = () => {
-  setTimeout(() => {
+// const emits = defineEmits(['getLength'])
+// emits('getLength', data.serverData.length)
+
+const inetServerLists = async () => {
+  try {
+    const res = await getServerLists()
+    // statusCode: '2' 注销， statusCode: '0' 正常， statusCode: '1' 超时
+    const addColorData = res.map((item: IApi) => {
+      return {
+        ...item,
+        color: judgeColorByStatusCode(item.statusCode).color,
+        fontColor: judgeColorByStatusCode(item.statusCode).fontColor,
+        dur: judgeColorByStatusCode(item.statusCode)?.dur
+      }
+    })
+    data.serverData = addColorData
     loading.value = false
-  }, 500)
+  } catch (error) {
+    loading.value = false
+    console.log(error)
+  }
 }
-onMounted(() => {
-  cancelLoading()
-})
+
+const judgeColorByStatusCode = (code: string): Fn => {
+  let data
+  switch (code) {
+    case '0':
+      data = { color: ['#00ff00', '#00ff00'], fontColor: '#00ff00' }
+      break
+    case '1':
+      data = { color: ['#77787b', '#77787b'], fontColor: '#77787b', dur: 12 }
+      break
+
+    default:
+      data = { color: ['#ef4136', '#ef4136'], fontColor: '#ef4136', dur: 0 }
+
+      break
+  }
+  return data
+}
+
+inetServerLists()
+
 const { serverData } = toRefs(data)
 </script>
 <style scoped lang="scss">
@@ -133,5 +147,25 @@ const { serverData } = toRefs(data)
   align-items: center;
   flex-direction: column;
   justify-content: center;
+}
+.chartIcon {
+  display: inline-flex;
+  align-items: center;
+  .border,
+  .border1,
+  .border2 {
+    display: inline-block;
+    width: 20px;
+    height: 12px;
+    border-radius: 3px;
+    background-color: #ef4136;
+    margin: 0 10px 0 20px;
+  }
+  .border1 {
+    background-color: #77787b;
+  }
+  .border2 {
+    background-color: #00ff00;
+  }
 }
 </style>

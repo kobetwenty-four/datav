@@ -11,50 +11,31 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
+import { getLogLists } from '@/script/api/rule'
 // * 加载标识
 const loading = ref<boolean>(true)
 const config = reactive({
-  data: [
-    {
-      name: 'DFX-0215-7 PTH焊盘阻焊开窗环宽',
-      value: 55
-    },
-    {
-      name: 'DFX-0215-7 PTH焊盘阻焊开窗环宽',
-      value: 55
-    },
-    {
-      name: 'DFX-0215-7 PTH焊盘阻焊开窗环宽',
-      value: 55
-    },
-    {
-      name: 'DFX-0215-7 PTH焊盘阻焊开窗环宽',
-      value: 55
-    },
-    {
-      name: 'DFX-0215-7 PTH焊盘阻焊开窗环宽',
-      value: 55
-    },
-    {
-      name: 'DFX-0215-7 PTH焊盘阻焊开窗环宽',
-      value: 55
-    },
-    {
-      name: 'DFX-0215-7 PTH焊盘阻焊开窗环宽',
-      value: 55
-    }
-  ],
-  unit: '条'
+  data: []
 })
-const cancelLoading = () => {
-  setTimeout(() => {
+
+const initData = async () => {
+  try {
+    const res = await getLogLists()
+    let dealData = res.map((item: any) => {
+      return {
+        ...item,
+        value: `${item.operName} ${item.operTime}`,
+        name: item.title
+      }
+    })
     loading.value = false
-  }, 500)
+    config.data = dealData
+  } catch (error) {
+    loading.value = false
+  }
 }
-onMounted(() => {
-  cancelLoading()
-})
+initData()
 </script>
 <style lang="scss" scoped>
 .rule {

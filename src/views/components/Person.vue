@@ -15,36 +15,22 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
+import { getPersonLists } from '@/script/api/person'
+interface Istate {
+  header: string[]
+  data: (string | number)[][]
+  index: boolean
+  columnWidth: number[]
+  align: string[]
+}
+
 // * 加载标识
 const loading = ref<boolean>(true)
 
-// const props = defineProps({
-//   height: {
-//     type: String,
-//     // default: '250px'
-//     // default: '15rem'
-//     default: '350px'
-//   }
-// })
-
-const config = reactive({
+const config = reactive<Istate>({
   header: ['人员', '提交', '完成', '产生结果数'],
-  data: [
-    ['冯元迪1', '1个', '8个', 123231213],
-    ['冯元迪2', '2个', '8个', 123231213],
-    ['冯元迪3', '3个', '8个', 123231213],
-    ['冯元迪4', '4个', '8个', 123231213],
-    ['冯元迪5', '5个', '8个', 123231213],
-    ['冯元迪6', '6个', '8个', 123231213],
-    ['冯元迪7', '7个', '8个', 123231213],
-    ['冯元迪8', '8个', '8个', 123231213],
-    ['冯元迪9', '9个', '8个', 123231213],
-    ['冯元迪10', '10个', '8个', 123231213],
-    ['冯元迪11', '11个', '8个', 123231213],
-    ['冯元迪12', '12个', '8个', 123231213],
-    ['冯元迪13', '13个', '8个', 123231213]
-  ],
+  data: [],
   index: true,
   columnWidth: [50],
   align: ['center']
@@ -62,10 +48,18 @@ const cancelLoading = () => {
     loading.value = false
   }, 500)
 }
-// 生命周期
-onMounted(() => {
-  cancelLoading()
-})
+
+const initPersonLists = async () => {
+  try {
+    const res: any = await getPersonLists()
+    console.log(res)
+    config.data = res
+    loading.value = false
+  } catch (error) {
+    loading.value = false
+  }
+}
+initPersonLists()
 </script>
 
 <style lang="scss" scoped>
